@@ -21,6 +21,7 @@
 				idris2
 			];
 			shellHook = ''
+				export SHELL=zsh
 				exec zsh
 			'';
 		};

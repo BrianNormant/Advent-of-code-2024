@@ -25,6 +25,7 @@ ex2 : String
 ex2 = ex1
 
 export
+partial
 run1 : IO()
 run1 = printLn $ show $ sol1 ex1
 -- run1 = do file <- readFile FILENAME
@@ -33,6 +34,7 @@ run1 = printLn $ show $ sol1 ex1
 --                Left _ => putStrLn "Error reading file"
 
 export
+partial
 run2 : IO()
 run2 = printLn $ show $ sol2 ex2
 -- run2 = do file <- readFile FILENAME
