@@ -22,6 +22,8 @@
 			];
 			shellHook = ''
 				export SHELL=zsh
+                # override idris2 and idris2-lsp to the lastest version compiled by pack
+                export PATH=$PATH:/home/brian/.pack/bin
 				exec zsh
 			'';
 		};

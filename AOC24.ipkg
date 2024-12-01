@@ -13,7 +13,7 @@ authors = "Brian Normant"
 -- langversion
 
 -- packages to add to search path
--- depends =
+depends = base, contrib
 
 -- modules to install
 -- modules =
@@ -22,9 +22,9 @@ authors = "Brian Normant"
 -- main =
 
 -- name of executable
--- executable =
+executable = main
 -- opts =
-sourcedir = src
+sourcedir = "src/"
 -- builddir =
 -- outputdir =
 
