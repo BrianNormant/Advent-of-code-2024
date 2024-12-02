@@ -2,11 +2,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 public class Solution {
-	private static final String INPUT_FILE = "./inputs/d01";
+	private static final String INPUT_FILE = "./inputs/d00.txt"; // Modify here and remove this comment
 	private static String example;
 	static {
 		var tmp = new StringBuilder();
-		//tmp.
+		//tmp.append("line1\n");
 		example = tmp.toString();
 	}
 	public static void main(String[] args) {
@@ -22,7 +22,7 @@ public class Solution {
 			while (true) {
 				tmp = bufreader.readLine();
 				if (tmp != null) {
-					strb.append(tmp);
+					strb.append(tmp + "\n");
 				} else {
 					bufreader.close();
 					break;
