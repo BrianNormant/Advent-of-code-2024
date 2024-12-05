@@ -99,8 +99,38 @@ sol1 s = let n = length (lines s)
                ||> sum
          ) ) s
 
+||| split lines as multiple sumblock of 3*3 char
+splitBlock3: List String -> LazyList (List Char)
+splitBlock3 xs = slidingWindows 3 xs
+              |> map (map ((slidingWindows 3) . unpack))
+              |> map (\c => case c of
+                                 [a,b,c] => zip3 a b c
+                                 _       => [] |> trace "Balls"
+                                 )
+              |> join
+              |> map (\(a,b,c) => a ++ b ++ c)
+
+compress : (List Char, List Char, List Char) -> String
+compress (t,m,d) = pack $ t ++ m ++ d
+
+SHOULD_MATCH : List (List (Char -> Bool))
+SHOULD_MATCH = let def : List (List (Char -> Bool))
+                   def = [[(== 'M'),     (const True), (== 'S')],
+                          [(const True), (== 'A'),     (const True)],
+                          [(== 'M'),     (const True), (== 'S')]]
+                   vert  = join $ map List.reverse def
+                   horz  = join $ List.transpose def
+                   vehz  = join $ List.transpose $ map List.reverse def
+                 in [join $ def, vert, horz, vehz]
+
 sol2 : String -> ?sol2ty
-sol2 _ = 2
+sol2 = lines
+   ||> splitBlock3
+   ||> filter (\l => map ((flip zip) l) SHOULD_MATCH
+               |> any (all (uncurry apply))
+           )
+   ||> toList
+   ||> length
 
 ex1 : String
 ex1 = """
@@ -117,7 +147,12 @@ MXMXAXMASX
 """
 
 ex2 : String
-ex2 = ex1
+ex2 = """
+M.SB
+.A.B
+M.SB
+BBBB
+"""
 
 export
 partial
@@ -131,8 +166,8 @@ run1 = do file <- readFile FILENAME
 export
 partial
 run2 : IO()
-run2 = printLn $ show $ sol2 ex2
--- run2 = do file <- readFile FILENAME
---           case file of
---                Right line => printLn $ sol2 line
---                Left _ => putStrLn "Error reading file"
+-- run2 = printLn $ show $ sol2 ex2
+run2 = do file <- readFile FILENAME
+          case file of
+               Right line => printLn $ sol2 line
+               Left _ => putStrLn "Error reading file"
