@@ -10,9 +10,11 @@ import Data.Maybe
 import Data.Either
 import Debug.Trace
 import Data.Fin
+import Data.List.Lazy
 
 import System.File
 import Lib
+import Topology
 
 %default total
 
@@ -91,7 +93,7 @@ sol1 = lex tmap
         ||> apply (\(ruleset, candidates) =>
                   filter (
                     isRespectingRuleSet ruleset
-                    ) candidates
+                    ) (fromList candidates)
                   )
         ||> map middle
         ||> sequence
@@ -146,6 +148,33 @@ sol2 = lex tmap
                   |> traverse id
                   |> maybe 0 sum
 
+partial
+sol2' : String -> ?sol3ty
+sol2' = lex tmap
+    ||> fst
+    ||> parse orderingGrammar
+    ||> getRight
+    ||> map (Builtin.fst
+          ||> bimap forget (forget ||> map forget)
+          ||> (\(r, c) => process ((processRules r), c))
+            )
+    ||> fromMaybe 0
+    where processRules : List (Integer, Integer) -> List (Integer, Integer)
+          processRules l = topoSort (adjList l) (inDegList l)
+                        |> map (\(x, xs) => map (MkPair x) xs )
+                        |> join
+
+          process : (RuleSet, Candidates) -> Integer
+          process (ruleset, candidates) =
+                       filter ( not . isRespectingRuleSet ruleset) candidates
+                       |> map (reorder ruleset)
+                       -- |> map (reorder ruleset)
+                       -- |> map (reorder ruleset)
+                       -- |> map (reorder ruleset)
+                       |> map middle
+                       |> traverse id
+                       |> maybe 0 sum
+
 
 ex1 : String
 ex1 = """
@@ -194,8 +223,8 @@ run1 = do file <- readFile FILENAME
 export
 partial
 run2 : IO()
--- run2 = printLn $ show $ sol2 ex2
+-- run2 = printLn $ show $ sol2' ex2
 run2 = do file <- readFile FILENAME
           case file of
-               Right line => printLn $ sol2 line
+               Right line => printLn $ sol2' line
                Left _ => putStrLn "Error reading file"
