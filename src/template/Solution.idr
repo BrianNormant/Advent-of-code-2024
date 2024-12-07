@@ -1,15 +1,17 @@
-module Solution
+module Main
 
-import Data.String
 import Data.List
+import Data.Maybe
 import Debug.Trace
 
 import System.File
 
+import Lib
+
 %default total
 
 FILENAME : String
-FILENAME = "./inputs/d01.txt"
+FILENAME = "./inputs/d00.txt"
 
 sol1 : String -> ?sol1ty
 sol1 _ = 1
@@ -27,7 +29,7 @@ ex2 = ex1
 export
 partial
 run1 : IO()
-run1 = printLn $ show $ sol1 ex1
+run1 = printLn  $ sol1 ex1
 -- run1 = do file <- readFile FILENAME
 --           case file of
 --                Right line => printLn $ sol1 line
@@ -36,7 +38,7 @@ run1 = printLn $ show $ sol1 ex1
 export
 partial
 run2 : IO()
-run2 = printLn $ show $ sol2 ex2
+run2 = printLn $ sol2 ex2
 -- run2 = do file <- readFile FILENAME
 --           case file of
 --                Right line => printLn $ sol2 line
