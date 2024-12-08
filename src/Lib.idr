@@ -68,7 +68,18 @@ dropLast = reverse . tail . reverse
 ||| self-explatory, create the all the permutation of a b
 export
 permutation : List a -> List b -> List (a,b)
-permutation xx yy = concatMap (\x => map (\y => (x,y) ) yy) xx
+permutation xx yy = MkPair xx yy |> bisequence
+
+export
+combination : (n : Nat) -> List a -> List (Vect n a)
+combination Z _ = [[]]
+combination _ [] = []
+combination m@(S n) (x::xs) = (map (x ::) (combination n xs))
+                           ++ (combination m xs)
+
+export
+fromVect2 : Vect 2 a -> (a, a)
+fromVect2 [x, y] = (x, y)
 
 export
 ||| try to create a pair form a list of 2
