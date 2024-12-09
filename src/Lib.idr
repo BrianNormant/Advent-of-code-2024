@@ -8,6 +8,8 @@ import Data.Integral
 import Data.These
 import Data.List.Extra
 
+import public Lib.Seq
+
 export infixr 1 ||>
 
 
@@ -155,6 +157,11 @@ middle l = if (odd (length l))
               else Nothing
 
 export
+repeat : Nat -> (a -> a) -> a -> a
+repeat Z _ a = a
+repeat (S k) f a = f (repeat k f a)
+
+export
 partial
 ||| repeat the application of a function
 ||| until the predicate is valid
@@ -197,6 +204,16 @@ swapAt' l x y = let a = index' l x
                  --- I'd need a proof that the lenght of the original
                  --- list is the same that the lenght of the intermediary list
                  |> (\l => replaceAt' l (believe_me y) a)
+
+export
+||| swap the first element of a list that respect a predicate
+||| with a different element
+||| ex: swap (== 0) [1,0,3,4] 9 := [1,9,3,4]
+swapIf : (a -> Bool) -> a -> List a -> List a
+swapIf _ _ [] = []
+swapIf p a (x::xs) with (p x)
+  _ | True = a :: xs
+  _ | False = x :: (swapIf p a xs)
 
 export
 splitPairs : List (a, b) -> (List a, List b)
