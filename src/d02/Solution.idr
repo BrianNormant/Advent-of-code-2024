@@ -41,7 +41,7 @@ sol1 = lines
 ||| ex: [1,2,3,4] -> [ [1,2,3,4], [2,3,4], [1,3,4], [1,2,4], [1,2,3] ]
 fn : List a -> LazyList (List a)
 fn [] = []
-fn xs = xs :: ( map (\i => Lib.deleteAt' xs i ) (fromList $ List.allFins (length xs)) )
+fn xs = xs :: ( map (\i => Lib.List.deleteAt' xs i ) (fromList $ List.allFins (length xs)) )
 --- example of Lazy evaluation, the subLists will only be computed if needed,
 --- whereas in the non-lazy solution, every single sublist will be created even if not necessary
 -- fn : Show a => List a -> List (List a)
