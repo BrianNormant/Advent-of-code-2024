@@ -4,6 +4,7 @@ import Data.String
 import Data.List
 import Data.List.Extra
 import Data.Seq.Unsized
+import Data.Seq.Internal
 import Data.Maybe
 import Data.Nat
 import Debug.Trace
@@ -44,15 +45,17 @@ parse1 = unpack
 debug : Seq Block -> String
 debug = map show ||> toList ||> joinBy ""
 
-defrag : Seq Block -> Seq Block
-defrag s with (any (isEmpty) s)
-  _ | False = s
-  _ | True with (last s)
-    _ | Just x = swapFistIf isEmpty x s
-              |> init
-              |> ( assert_total $ defrag )
-    _ | Nothing = empty
 
+defrag : Seq Block -> (Seq Block, Seq Block)
+defrag s with (any (isEmpty) s)
+  _ | False = (s, empty)
+  _ | True with (last s)
+    _ | Just x = let (r, s) = swapFistIf isEmpty x s
+                           |> init
+                           |> splitFirstWhere isEmpty
+                     (r', s') = assert_total defrag s
+                  in (r ++ r', s')
+    _ | Nothing = (empty, empty)
 
 checksum : Seq Block -> Nat
 checksum = toList
@@ -63,7 +66,7 @@ checksum = toList
        ||> sum
 
 sol1 : String -> ?sol1ty
-sol1 = parse1 ||> defrag ||> checksum
+sol1 = parse1 ||> defrag ||> fst ||> checksum
 
 parse2 : String -> Seq (Int, Int)
 parse2 = unpack

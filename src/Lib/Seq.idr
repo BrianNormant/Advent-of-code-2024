@@ -33,3 +33,34 @@ swapLastIf p e s with (last s)
   _ | Just x with (p x)
     _ | True  = assert_total $ snoc (init s) e
     _ | False = assert_total $ snoc (swapLastIf p e $ init s) x
+
+export
+||| get the element valid from a predicate
+||| starting at the end of the seq
+lastThat : (a -> Bool) -> Seq a -> Maybe a
+lastThat p s with (last s)
+  _ | Nothing = Nothing
+  _ | Just x with (p x)
+    _ | True = Just x
+    _ | False = assert_total lastThat p (init s)
+
+
+export
+||| split the seq at the first element valid from a predicate
+||| starting at the front of the seq
+||| ex: splitFirstWhere (== 0) [1,2,0,4,5] = ([1,2], [0, 4, 5])
+splitFirstWhere : (a -> Bool) -> Seq a -> (Seq a, Seq a)
+splitFirstWhere p s with (head s)
+  _ | Nothing = (empty, empty)
+  _ | Just x with (p x)
+    _ | True = (empty, s)
+    _ | False = let (a,b) = assert_total splitFirstWhere p (tail s)
+                 in (cons x a, b)
+
+export
+dropUntil : (a -> Bool) -> Seq a -> Seq a
+dropUntil p s with (head s)
+  _ | Nothing = empty
+  _ | Just x with (p x)
+    _ | True = s
+    _ | False = assert_total dropUntil p (tail s)
