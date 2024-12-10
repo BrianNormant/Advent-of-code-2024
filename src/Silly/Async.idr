@@ -44,7 +44,7 @@ showMe = compute
 
 partial
 main : IO ()
-main = app 16 [] showMe
+main = app 24 [] showMe
 
 partial
 main' : IO ()
