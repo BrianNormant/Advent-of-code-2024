@@ -2,9 +2,13 @@ module Main
 
 import Data.List
 import Data.Maybe
+import Data.String
+
 import Debug.Trace
 
 import System.File
+
+import Text.PrettyPrint.Bernardy
 
 import Lib
 
@@ -26,10 +30,13 @@ ex1 = """
 ex2 : String
 ex2 = ex1
 
+opts : LayoutOpts
+opts = Opts 60
+
 export
 partial
 run1 : IO()
-run1 = printLn  $ sol1 ex1
+run1 = putStrLn $ Doc.render opts $ pretty $ sol1 ex1
 -- run1 = do file <- readFile FILENAME
 --           case file of
 --                Right line => printLn $ sol1 line
@@ -38,7 +45,7 @@ run1 = printLn  $ sol1 ex1
 export
 partial
 run2 : IO()
-run2 = printLn $ sol2 ex2
+run2 = putStrLn $ Doc.render opts $ pretty $ sol2 ex2
 -- run2 = do file <- readFile FILENAME
 --           case file of
 --                Right line => printLn $ sol2 line
