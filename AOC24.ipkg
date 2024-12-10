@@ -13,13 +13,13 @@ authors = "Brian Normant"
 -- langversion
 
 -- packages to add to search path
-depends = base, contrib
+depends = base, contrib, elab-util, containers, array, async-epoll
 
 -- modules to install
--- modules =
+modules = Silly.Async
 
 -- main file (i.e. file to load at REPL)
--- main =
+main = Silly.Async
 
 -- name of executable
 executable = main

@@ -23,3 +23,4 @@ fib = fib' empty ||> snd
                               r = n1 + n2
                               m = insert k r m
                            in (m, r)
+

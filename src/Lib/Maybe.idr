@@ -8,8 +8,11 @@ import Data.These
 
 export
 pairMaybe : (Maybe a, Maybe b) -> Maybe (a, b)
-pairMaybe (Just x, Just y) = Just (x, y)
-pairMaybe _ = Nothing
+pairMaybe (x, y) = [| (x, y) |]
+
+export
+pairMaybe' : Maybe a -> Maybe b -> Maybe (a, b)
+pairMaybe' = curry pairMaybe
 
 export
 theseMaybe : (Maybe a, Maybe b) -> Maybe (These a b)
