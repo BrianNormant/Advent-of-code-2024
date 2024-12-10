@@ -77,3 +77,8 @@ toVectD l = let v = l
                  |> catMaybes
                  |> toVect (length l)
              in maybe (_ ** []) (\v' => (_ ** v')) v
+
+export
+||| index a matrix with x y
+indexMat : (Fin m, Fin n) -> Vect n (Vect m a) -> a
+indexMat (x, y) v = index x $ index y v

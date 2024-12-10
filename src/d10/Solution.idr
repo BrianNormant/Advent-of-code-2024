@@ -41,10 +41,6 @@ follow : {n : Nat} -> Vect n (Vect n Bits8) -> (Fin n, Fin n)  -> List (Fin n, F
 follow [] _ = []
 follow v (cx, cy) with (index cx $ index cy v)
   _ | 9 = [(cx, cy)]
-  _ | 0 = neighbors ((cx, cy) |> traceVal) v
-       |> filter (\(p', _) => p' ==  (1))
-       |> map (\(_, nc) => follow v nc)
-       |> join
   _ | p = neighbors (cx, cy) v
        |> filter (\(p', _) => p' ==  (p + 1))
        |> map (\(_, nc) => follow v nc)
@@ -68,8 +64,18 @@ sol1 = parse1
        |> sum
        )))
 
+partial
 sol2 : String -> ?sol2ty
-sol2 _ = 2
+sol2 = parse1
+   ||> (\(n' ** v) => (( v
+       |> getStarting
+       |> map (\c =>
+              follow v c
+              |> map (bimap finToNat finToNat)
+              |> length
+            )
+       |> sum
+       )))
 
 ex1 : String
 ex1 = """
@@ -98,8 +104,8 @@ run1 = do file <- readFile FILENAME
 export
 partial
 run2 : IO()
-run2 = printLn $ sol2 ex2
--- run2 = do file <- readFile FILENAME
---           case file of
---                Right line => printLn $ sol2 line
---                Left _ => putStrLn "Error reading file"
+-- run2 = printLn $ sol2 ex2
+run2 = do file <- readFile FILENAME
+          case file of
+               Right line => printLn $ sol2 line
+               Left _ => putStrLn "Error reading file"
