@@ -47,6 +47,11 @@ pairFromList [x, y] = Just (x, y)
 pairFromList _ = Nothing
 
 export
+||| transform a homogenous pair into a list
+pairToList : (a, a) -> List a
+pairToList (x, y) = [x, y]
+
+export
 pair : a -> (a, a)
 pair x = (x, x)
 
