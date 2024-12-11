@@ -13,7 +13,7 @@ authors = "Brian Normant"
 -- langversion
 
 -- packages to add to search path
-depends = base, contrib, elab-util, prettier, containers, array, async-epoll
+depends = base, contrib, elab-util, prettier, containers, array, async-epoll, idrisGL
 
 -- modules to install
 modules = Silly.Async

@@ -19,7 +19,18 @@
 				chez
 				rlwrap
 				idris2
+                pkg-config
+                SDL # TODO clone and fix the Makefile of
+                # https://github.com/ECburx/Idris2GL/blob/main/src/c_src/Makefile
+                # to link -lSDL
+                # also override the package in ~/pack/user.toml
+                SDL2
+                SDL2_ttf
+                SDL2_gfx
+                SDL2_mixer
+                SDL2_image
 			];
+
 			shellHook = ''
 				export SHELL=zsh
                 # override idris2 and idris2-lsp to the lastest version compiled by pack
