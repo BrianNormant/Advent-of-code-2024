@@ -13,6 +13,8 @@ import public Lib.Maybe
 import public Lib.Vect
 import public Lib.List
 import public Lib.Fin
+import public Lib.SnocList
+import public Lib.Queue
 
 export infixr 1 ||>
 

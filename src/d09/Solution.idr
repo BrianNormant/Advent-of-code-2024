@@ -1,12 +1,14 @@
-module Main
+-- module Main
 
-import Data.String
 import Data.List
 import Data.List.Extra
-import Data.Seq.Unsized
-import Data.Seq.Internal
 import Data.Maybe
 import Data.Nat
+-- import Data.Seq.Unsized
+-- import Data.Seq.Internal
+import Data.Queue
+import Data.String
+
 import Debug.Trace
 
 import System.File
@@ -29,7 +31,10 @@ Show Block where
   show (MkBlock (Just i)) = cast (i)
   show (MkBlock Nothing) = "."
 
-parse1 : String -> Seq Block
+DList : Type -> Type
+DList = Queue
+
+parse1 : String -> DList Block
 parse1 = unpack
      ||> map (\c => (the Int $ cast c) - 48 )
      ||> grouped 2
@@ -41,12 +46,13 @@ parse1 = unpack
               )
      ||> join
      ||> fromList
+     ||> balance
 
-debug : Seq Block -> String
+debug : DList Block -> String
 debug = map show ||> toList ||> joinBy ""
 
 
-defrag : Seq Block -> (Seq Block, Seq Block)
+defrag : DList Block -> (DList Block, DList Block)
 defrag s with (any (isEmpty) s)
   _ | False = (s, empty)
   _ | True with (last s)
@@ -57,7 +63,7 @@ defrag s with (any (isEmpty) s)
                   in (r ++ r', s')
     _ | Nothing = (empty, empty)
 
-checksum : Seq Block -> Nat
+checksum : DList Block -> Nat
 checksum = toList
        ||> map (\b => id b)
        ||> catMaybes
@@ -68,7 +74,7 @@ checksum = toList
 sol1 : String -> ?sol1ty
 sol1 = parse1 ||> defrag ||> fst ||> checksum
 
-parse2 : String -> Seq (Int, Int)
+parse2 : String -> DList (Int, Int)
 parse2 = unpack
      ||> map (\c => (the Int $ cast c) - 48 )
      ||> grouped 2
@@ -82,7 +88,7 @@ parse2 = unpack
      ||> filter (snd ||> (/= 0))
      ||> fromList
 
-debug2 : Seq (Int, Int) -> String
+debug2 : DList (Int, Int) -> String
 debug2 = toList
      ||> map (\(i,s) => case i of
                              0 => replicate (cast s) '.'
@@ -93,7 +99,7 @@ debug2 = toList
 ||| Swap if the block can fit
 ||| when swapping, split the empty space
 ||| to have the block not modify the replaced space
-customSwapIf : (Int, Int) -> Seq (Int, Int) -> (Bool, Seq (Int, Int))
+customSwapIf : (Int, Int) -> DList (Int, Int) -> (Bool, DList (Int, Int))
 customSwapIf (id, si) s with (head s)
   _ | Nothing = (False, empty)
   _ | Just x with ((fst x) == 0 && id /= 0 && si <= (snd x))
@@ -106,7 +112,7 @@ customSwapIf (id, si) s with (head s)
                     ))
 
 total
-defragStep : Seq (Int, Int) -> Seq (Int, Int)
+defragStep : DList (Int, Int) -> DList (Int, Int)
 -- defragStep s = s
 defragStep s with (last s)
   _ | Just x = let (r, t) = customSwapIf x s
@@ -159,3 +165,7 @@ run2 = do file <- readFile FILENAME
           case file of
                Right line => printLn $ sol2 line
                Left _ => putStrLn "Error reading file"
+
+public export partial
+main : IO ()
+main = run1
