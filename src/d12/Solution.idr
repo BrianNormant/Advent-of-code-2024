@@ -66,16 +66,72 @@ sol1 = lines
    ||> map snd
    ||> sum
 
+
+||| identify the contiguous regions
+||| and all the points in each regions
+||| and get the first point in each regions
+regions' : Eq ty => Ord ty =>
+          {n:Nat} -> Vect n (Vect n ty) -> (Vect n (Vect n (ty, Nat)), List (Fin n, Fin n), List (List (Fin n, Fin n)))
+regions' mat = allCoord mat
+           |> foldl (\l,c =>
+                    if (isJust $ List.find (== c) (map (map fst) l |> join))
+                       then l
+                       else (contiguous mat c) :: l
+                    ) (the (List (List ((Fin n, Fin n), ty))) [])
+           |> apply (\lreg => ( helper mat lreg,
+                    map (head' ||> map Builtin.fst) lreg |> catMaybes,
+                    lreg |> map (map Builtin.fst)
+                    ))
+                    where
+                      helper : Vect n (Vect n ty) -> List (List ((Fin n, Fin n), ty)) -> Vect n (Vect n (ty, Nat))
+                      helper mat l = l
+                                  |> mapi MkPair
+                                  |> map (\(i,c) => map (\(co, ca) => (co, (ca, i))) c)
+                                  |> foldl (\acc,c =>
+                                         foldl (\mat,(co, r) => replaceMat co mat r ) acc c
+                                     ) (map (map (\x => (x, 0))) mat)
+
+process2 : Eq a => Ord a => {n : Nat} -> Vect n (Vect n a) -> List (Int, Int)
+process2 mat =
+  let (reg, freg, lreg) = regions' mat -- List of the first point of each regions
+      fence = map (\coord =>
+              let poly := poly coord reg
+                  xs := sum $ map (\sl => div (cast $ length sl) 2 ) (sortGroupBy fst poly)
+                  ys := sum $ map (\sl => div (cast $ length sl) 2 ) (sortGroupBy snd poly)
+               in xs + ys
+              ) freg
+      areas = map (cast . length) lreg
+   in zip areas fence
+
+
+
 sol2 : String -> ?sol2ty
-sol2 _ = 2
+sol2 = lines
+   ||> map unpack
+   ||> toVectD
+   ||> (\(_ ** mat) => process2 mat)
+   ||> map (uncurry (*))
+   ||> sum
 
 ex1 : String
 ex1 = """
-AAAA
-BBCD
-BBCC
-EEEC
+AAAAAA
+AAABBA
+AAABBA
+ABBAAA
+ABBAAA
+AAAAAA
 """
+
+tmp : Vect 6 (Vect 6 Char)
+tmp = [
+  [ 'A', 'A', 'A', 'A', 'A', 'A'  ],
+  [ 'A', 'A', 'A', 'B', 'B', 'A'  ],
+  [ 'A', 'A', 'A', 'B', 'B', 'A'  ],
+  [ 'A', 'B', 'B', 'A', 'A', 'A'  ],
+  [ 'A', 'B', 'B', 'A', 'A', 'A'  ],
+  [ 'A', 'A', 'A', 'A', 'A', 'A'  ]
+  ]
 
 ex2 : String
 ex2 = """
@@ -106,8 +162,8 @@ run1 = do file <- readFile FILENAME
 export
 partial
 run2 : IO()
-run2 = putStrLn $ Doc.render opts $ pretty $ sol2 ex2
--- run2 = do file <- readFile FILENAME
---           case file of
---                Right line => printLn $ sol2 line
---                Left _ => putStrLn "Error reading file"
+-- run2 = putStrLn $ Doc.render opts $ pretty $ sol2 ex2
+run2 = do file <- readFile FILENAME
+          case file of
+               Right line => printLn $ sol2 line
+               Left _ => putStrLn "Error reading file"

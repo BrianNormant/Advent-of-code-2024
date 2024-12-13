@@ -127,7 +127,7 @@ export
 ||| get all the contigious elements
 ||| ie the elements that are the same and directly next to
 ||| the first or similar elements
-contiguous : Eq a => Show a => {n:Nat} -> Vect n (Vect n a)
+contiguous : Eq a => {n:Nat} -> Vect n (Vect n a)
          -> (Fin n, Fin n) -> List ((Fin n, Fin n), a)
 contiguous v' c' = go v' c' (indexMat c' v') [] where
   ||| recursivly check if this cell is contiguous then the neighboring cells
@@ -148,3 +148,106 @@ contiguous v' c' = go v' c' (indexMat c' v') [] where
                          in acc
                        )
                        else acc
+
+export
+matUp : (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matUp (_, FZ) = Nothing
+matUp (x, (FS y)) = Just (x, weaken y)
+
+export
+matLeft : (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matLeft (FZ, _) = Nothing
+matLeft ((FS x), y) = Just (weaken x, y)
+
+export
+matRight : {n:Nat} -> (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matRight (x,y) = map (\x' => (x', y)) (strengthen (FS x))
+
+export
+matDown : {m : Nat} -> (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matDown (x,y) = map (\y' => (x, y')) (strengthen (FS y))
+
+export
+matUL : (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matUL c = do c <- matUp c
+             c <- matLeft c
+             pure c
+
+export
+matUR : {n: Nat } -> (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matUR c = do c <- matUp c
+             c <- matRight c
+             pure c
+
+export
+matDL : {m : Nat} -> (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matDL c = do c <- matDown c
+             c <- matLeft c
+             pure c
+
+export
+matDR : {m : Nat} -> {n : Nat} -> (Fin n, Fin m) -> Maybe (Fin n, Fin m)
+matDR c = do c <- matDown c
+             c <- matRight c
+             pure c
+
+
+
+export
+||| find a polygon in a 2D space
+poly : Eq ty => {n:Nat} -> (Fin n, Fin n) -> Vect n (Vect n ty)
+    -> List (Fin (S n), Fin (S n))
+poly c mat = poly' c (indexMat c mat) mat [] |> map snd |> join where
+  helper : ty -> Maybe (Fin n, Fin n) -> Bool
+  helper _ Nothing = True
+  helper e (Just c) = (indexMat c mat) /= e
+
+  poly' : (Fin n, Fin n) -> ty -> Vect n (Vect n ty)
+       -> List ((Fin n, Fin n), List (Fin (S n), Fin (S n)))
+       -> List ((Fin n, Fin n), List (Fin (S n), Fin (S n)))
+  poly' c@(x, y) e mat mem with (lookup c mem)
+    _ | Just _ = mem
+    _ | Nothing = if (indexMat c mat /= e)
+                     then mem
+                     else (
+      let up    = helper e $ matUp c
+          down  = helper e $ matDown c
+          left  = helper e $ matLeft c
+          right = helper e $ matRight c
+          points = case the (List ?list) [up, down, left, right] of
+                        [True, False, False, True] => [(FS x, weaken y)]
+                        [True, False, True, False] => [(weaken x, weaken y)]
+                        [False, True, False, True] => [(FS x, FS y)]
+                        [False, True, True, False] => [(weaken x, FS y)]
+                        [True, False, True,  True] =>
+                          [(weaken x, weaken y), (FS x, weaken y)]
+                        [True, True,  False, True] =>
+                          [(FS x, weaken y), (FS x, FS y)]
+                        [False, True, True,  True] =>
+                          [(weaken x, FS y), (FS x, FS y)]
+                        [True, True,  True, False] =>
+                          [(weaken x, weaken y), (weaken x, FS y)]
+                        [True, True,  True,  True] =>
+                          [(weaken x, weaken y), (FS x, weaken y),
+                           (weaken x, FS y), (FS x, FS y)]
+                        _ => []
+
+          ur = helper e $ matUR c
+          ul = helper e $ matUL c
+          dr = helper e $ matDR c
+          dl = helper e $ matDL c
+          points = points ++ if ur && (not up) && (not right) then [(FS x, weaken y)] else []
+          points = points ++ if ul && (not up) && (not left) then [(weaken x, weaken y)] else []
+          points = points ++ if dr && (not down) && (not right) then [(FS x, FS y)] else []
+          points = points ++ if dl && (not down) && (not left) then [(weaken x, FS y)] else []
+
+
+          mem = (c, points) :: mem
+          mem = neighbors c mat
+             |> filter ((== e) . fst)
+             |> map snd
+             |> foldl (\acc,g =>
+                      assert_total poly' g e mat acc
+                      ) mem
+       in mem
+       )

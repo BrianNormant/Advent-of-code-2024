@@ -1,6 +1,7 @@
 module Lib.List
 
 import Data.List
+import Data.List1
 import Data.Fin
 import Data.Integral
 
@@ -88,3 +89,16 @@ export
 mapif : (a -> Bool) -> (a -> a) -> List a -> List a
 mapif _ _ [] = []
 mapif p f (x::xs) = (if (p x) then f x else x ) :: mapif p f xs
+
+export
+||| it is often necessary to first sort before grouping elements
+groupSort : Eq a => Ord a => List a -> List (List a)
+groupSort l = sort l |> group |> map forget
+
+export
+||| sort then group, uses a function that transform the contained
+||| datatype into a comparable and sortable one
+sortGroupBy : Eq b => Ord b => (a -> b) -> List a -> List (List a)
+sortGroupBy f l = sortBy (\x,y  => compare (f x) (f y)) l
+               |> groupBy (\x,y => (f x) == (f y))
+               |> map forget
