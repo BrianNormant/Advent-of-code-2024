@@ -4,6 +4,8 @@ import Data.List
 import Data.Maybe
 import Data.String
 
+import Derive.Prelude
+
 import Debug.Trace
 
 import System.File
@@ -13,6 +15,8 @@ import Text.PrettyPrint.Bernardy
 import Lib
 
 %default total
+%language ElabReflection
+
 
 FILENAME : String
 FILENAME = "./inputs/d00.txt"
@@ -36,17 +40,17 @@ opts = Opts 60
 export
 partial
 run1 : IO()
-run1 = putStrLn $ Doc.render opts $ pretty $ sol1 ex1
--- run1 = do file <- readFile FILENAME
---           case file of
---                Right line => printLn $ sol1 line
---                Left _ => putStrLn "Error reading file"
+-- run1 = putStrLn $ Doc.render opts $ pretty $ sol1 ex1
+run1 = do file <- readFile FILENAME
+          case file of
+               Right line => putStrLn $ Doc.render opts $ pretty $ sol1 ex1
+               Left _ => putStrLn "Error reading file"
 
 export
 partial
 run2 : IO()
-run2 = putStrLn $ Doc.render opts $ pretty $ sol2 ex2
--- run2 = do file <- readFile FILENAME
---           case file of
---                Right line => printLn $ sol2 line
---                Left _ => putStrLn "Error reading file"
+-- run2 = putStrLn $ Doc.render opts $ pretty $ sol2 ex2
+run2 = do file <- readFile FILENAME
+          case file of
+               Right line => putStrLn $ Doc.render opts $ pretty $ sol2 ex2
+               Left _ => putStrLn "Error reading file"
