@@ -96,9 +96,7 @@ process2 mat =
   let (reg, freg, lreg) = regions' mat -- List of the first point of each regions
       fence = map (\coord =>
               let poly := poly coord reg
-                  xs := sum $ map (\sl => div (cast $ length sl) 2 ) (sortGroupBy fst poly)
-                  ys := sum $ map (\sl => div (cast $ length sl) 2 ) (sortGroupBy snd poly)
-               in xs + ys
+               in cast $ length poly
               ) freg
       areas = map (cast . length) lreg
    in zip areas fence
