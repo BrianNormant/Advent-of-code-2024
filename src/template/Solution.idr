@@ -43,7 +43,7 @@ run1 : IO()
 -- run1 = putStrLn $ Doc.render opts $ pretty $ sol1 ex1
 run1 = do file <- readFile FILENAME
           case file of
-               Right line => putStrLn $ Doc.render opts $ pretty $ sol1 ex1
+               Right line => putStrLn $ Doc.render opts $ pretty $ sol1 line
                Left _ => putStrLn "Error reading file"
 
 export
@@ -52,5 +52,5 @@ run2 : IO()
 -- run2 = putStrLn $ Doc.render opts $ pretty $ sol2 ex2
 run2 = do file <- readFile FILENAME
           case file of
-               Right line => putStrLn $ Doc.render opts $ pretty $ sol2 ex2
+               Right line => putStrLn $ Doc.render opts $ pretty $ sol2 line
                Left _ => putStrLn "Error reading file"
