@@ -25,3 +25,7 @@ export
 dec : {n:Nat} -> Fin n -> Maybe (Fin n)
 dec FZ = Nothing
 dec (FS x) = Just $ weaken x
+
+export
+finToInt : Fin _ -> Int
+finToInt f = cast $ finToNat f

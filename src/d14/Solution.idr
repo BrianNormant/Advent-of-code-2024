@@ -225,9 +225,7 @@ controlModel event = do
 
 -- model is updated with keyboard event
 updateModel : Double -> StateT Model IO ()
-updateModel _ = do
-     model <- get
-     put model
+updateModel _ = modify id
 
 partial
 main : IO ()

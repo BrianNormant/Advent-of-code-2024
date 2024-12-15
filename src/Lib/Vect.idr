@@ -114,6 +114,47 @@ replaceMat (x, y) v a = let lin = index y v
                          in replaceAt y lin v
 
 export
+||| apply a function at a position in a matrix
+doAtMat : (Fin m, Fin n) -> (a -> a) -> Vect n (Vect m a) -> Vect n (Vect m a)
+doAtMat (x, y) f v = let old = indexMat (x, y) v
+                         new = f old
+                      in replaceMat (x, y) v new
+
+export
+mapMat : (a -> b) -> Vect n (Vect m a) -> Vect n (Vect m b)
+mapMat f v = map (map f) v
+
+export
+foldlMat : (acc -> a -> acc) -> acc -> Vect n (Vect m a) -> acc
+foldlMat f acc [] = acc
+foldlMat f acc (v::vs) = foldlMat f (foldl f acc v) vs
+
+export
+toListMat : Vect n (Vect m a) -> List a
+toListMat v = join $ toList $ map toList v
+
+export
+||| find an element in a matrix
+matFind : {n,m : Nat} -> (a -> Bool) -> Vect n (Vect m a) -> Maybe a
+matFind _ [] = Nothing
+matFind f (v::vs) = case find f v of
+                         Just n => Just n
+                         Nothing => matFind f vs
+
+export
+indexes : {n : Nat} -> Vect n Nat
+indexes {n = 0} = []
+indexes {n = S k} = believe_me (fromList [0..k])
+
+onePlusSucc : (left : Nat) -> S left = left + 1
+onePlusSucc Z = Refl
+onePlusSucc (S k) = cong S (onePlusSucc k)
+
+export
+zipWithIndexMat : {n,m : Nat} -> Vect n (Vect m a) -> Vect n (Vect m ((Fin m, Fin n), a))
+zipWithIndexMat v = zipWith (\j,vs => zipWith (\i,a => ((i,j), a)) (allFins m) vs) (allFins n) v
+
+export
 ||| list all the coordinates of a matrix
 allCoord : {n : Nat} -> {m : Nat} -> Vect n (Vect m a) -> List (Fin m, Fin n)
 allCoord {n, m} _ = bisequence ((List.allFins m), (List.allFins n))
@@ -190,8 +231,6 @@ matDR : {m : Nat} -> {n : Nat} -> (Fin n, Fin m) -> Maybe (Fin n, Fin m)
 matDR c = do c <- matDown c
              c <- matRight c
              pure c
-
-
 
 export
 ||| find a polygon in a 2D space
