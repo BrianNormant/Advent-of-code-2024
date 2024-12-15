@@ -1,20 +1,26 @@
 module Main
 
-import Data.List
-import Data.Vect
-import Data.Maybe
 import Data.Either
+import Data.List
+import Data.Maybe
 import Data.String
+import Data.Vect
 
 import Derive.Prelude
 
 import Debug.Trace
 
+import System
 import System.File
 
-import Text.PrettyPrint.Bernardy
 import Text.Lexer
 import Text.Parser
+import Text.PrettyPrint.Bernardy
+
+import Control.Monad.State
+
+import IdrisGL
+import IdrisGL.Color as Color
 
 import Lib
 
@@ -140,6 +146,95 @@ sol1 = lines
 
 sol2 : String -> ?sol2ty
 sol2 _ = 2
+
+
+SCREENX : Int
+SCREENX = 3840
+SCREENY : Int
+SCREENY = 2160
+FPS : Double
+FPS = 144.0
+DIMBLOCK : Int
+DIMBLOCK = 20
+RESX : Int
+RESX = DIMX * DIMBLOCK
+RESY : Int
+RESY = DIMY * DIMBLOCK
+
+window : Display
+window = InWindow "Advent of Code Day 14"
+                  (MkRect (div SCREENX 2 - div RESX 2 )
+                          (div SCREENY 2 - div RESY 2 )
+                          RESX
+                          RESY
+                  )
+
+Model : Type
+Model = (Int, List Robot)
+
+createModel : String -> Model
+createModel = lines
+          ||> map (lex tmap
+               ||> fst
+               ||> parse robotGrammar
+                  )
+          ||> rights
+          ||> map fst
+          ||> (\a => (0, a))
+
+stepForward : List Robot -> List Robot
+stepForward = map (step) where
+     step : Robot -> Robot
+     step (MkRobot (x, y) (vx, vy)) =
+          MkRobot (mod (x + vx) DIMX, mod (y + vy) DIMY)
+                  (vx, vy)
+
+stepBackward : List Robot -> List Robot
+stepBackward = map (step) where
+     step : Robot -> Robot
+     step (MkRobot (x, y) (vx, vy)) =
+          MkRobot (mod (x - vx) DIMX, mod (y - vy) DIMY)
+                  (vx, vy)
+
+
+
+displayRobot : Robot -> Picture
+displayRobot (MkRobot (x,y) _) =
+     let x = DIMBLOCK * x
+         y = DIMBLOCK * y
+         rect = MkRect x y DIMBLOCK DIMBLOCK
+         color = Color.green
+      in Rectangle rect color True
+
+displayModel : StateT Model IO Picture
+displayModel = do
+     (it, model) <- get
+     putStrLn ("Number of iteration : " ++ show it)
+     pure $ (
+          let grid = map displayRobot model |> Pictures
+           in grid
+           )
+
+controlModel : Eve -> StateT Model IO ()
+controlModel event = do
+     (it, model) <- get
+     case event of
+          (E_KEYDOWN EK_RIGHT) => put (it + 1, stepForward model)
+          (E_KEYDOWN EK_LEFT)  => put (it - 1, stepBackward model)
+          _ => put (it, model)
+
+-- model is updated with keyboard event
+updateModel : Double -> StateT Model IO ()
+updateModel _ = do
+     model <- get
+     put model
+
+partial
+main : IO ()
+main = do Right line <- readFile FILENAME
+               | Left _ => putStrLn "Error reading file"
+          playStateT window Color.black 0 (createModel line) displayModel controlModel updateModel
+
 
 ex1 : String
 ex1 = """
